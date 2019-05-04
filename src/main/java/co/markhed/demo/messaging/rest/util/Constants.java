@@ -1,4 +1,4 @@
-package co.markhed.demo.messaging.rest;
+package co.markhed.demo.messaging.rest.util;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 
@@ -6,7 +6,7 @@ public class Constants {
 
     private Constants() {}
 
-    public static final String DEFAULT_JSON = APPLICATION_JSON_UTF8_VALUE;
+    public static final String JSON = APPLICATION_JSON_UTF8_VALUE;
 
     public class ApiPaths {
 

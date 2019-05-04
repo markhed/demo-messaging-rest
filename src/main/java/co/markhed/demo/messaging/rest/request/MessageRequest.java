@@ -1,27 +1,34 @@
 package co.markhed.demo.messaging.rest.request;
 
-import java.util.Date;
+import javax.validation.constraints.NotNull;
 
 public class MessageRequest {
 
-    private String senderId;
-    private String receiverId;
+    @NotNull
+    private Integer senderId;
+
+    @NotNull
+    private Integer receiverId;
+
+    @NotNull
     private String subject;
+
+    @NotNull
     private String body;
 
-    public String getSenderId() {
+    public Integer getSenderId() {
         return senderId;
     }
 
-    public void setSenderId(String senderId) {
+    public void setSenderId(Integer senderId) {
         this.senderId = senderId;
     }
 
-    public String getReceiverId() {
+    public Integer getReceiverId() {
         return receiverId;
     }
 
-    public void setReceiverId(String receiverId) {
+    public void setReceiverId(Integer receiverId) {
         this.receiverId = receiverId;
     }
 
