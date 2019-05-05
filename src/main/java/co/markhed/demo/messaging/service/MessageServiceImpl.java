@@ -3,15 +3,13 @@ package co.markhed.demo.messaging.service;
 import co.markhed.demo.messaging.model.Message;
 import co.markhed.demo.messaging.repository.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
+import static org.apache.commons.collections4.IteratorUtils.toList;
 
 @Service
 public class MessageServiceImpl implements MessageService {
@@ -37,11 +35,7 @@ public class MessageServiceImpl implements MessageService {
     @Override
     @Transactional(readOnly = true)
     public Optional<Message> readMessage(int messageId) {
-        try {
-            return of(messageRepository.findById(messageId));
-        } catch (EmptyResultDataAccessException e) {
-            return empty();
-        }
+        return messageRepository.findById(messageId);
     }
 
     @Override
@@ -54,6 +48,12 @@ public class MessageServiceImpl implements MessageService {
     @Transactional(readOnly = true)
     public List<Message> getReceivedMessagesOfUser(int userId) {
         return messageRepository.findByReceiverId(userId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Message> getAllMessages() {
+        return toList(messageRepository.findAll().iterator());
     }
 
 }

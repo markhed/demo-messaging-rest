@@ -7,7 +7,7 @@ import java.util.Date;
 
 public class TestMessageUtil {
 
-    public static final int ANY_VALUE = 99999; // don't-care value
+    public static final Integer ANY_VALUE = 99999; // don't-care value
 
     public static Message newTestMessageWithNoId(int index) {
         Message message = new Message();

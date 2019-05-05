@@ -14,10 +14,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static co.markhed.demo.messaging.rest.util.Constants.ApiPaths.MESSAGES_PATH;
-import static co.markhed.demo.messaging.rest.util.Constants.ApiPaths.RECEIVED_PATH;
-import static co.markhed.demo.messaging.rest.util.Constants.ApiPaths.SENT_PATH;
+import static co.markhed.demo.messaging.rest.util.Constants.ApiPaths.MESSAGES_FULL_PATH;
 import static co.markhed.demo.messaging.rest.util.Constants.JSON;
+import static co.markhed.demo.messaging.rest.util.Constants.VariablePaths.RECEIVER_ID_VARNAME;
+import static co.markhed.demo.messaging.rest.util.Constants.VariablePaths.SENDER_ID_VARNAME;
 import static co.markhed.demo.messaging.util.GeneralUtil.format;
 import static co.markhed.demo.messaging.util.GeneralUtil.path;
 import static co.markhed.demo.messaging.util.TestMessageUtil.ANY_VALUE;
@@ -63,7 +63,7 @@ public class MessagingControllerTest {
 
         //when and then
         ResultActions resultActions = mockMvc.perform(
-            post(MESSAGES_PATH).content(asJson(messageRequest)).accept(JSON).contentType(JSON));
+            post(MESSAGES_FULL_PATH).content(asJson(messageRequest)).accept(JSON).contentType(JSON));
         resultActions.andExpect(status().isCreated()).andExpect(content().contentType(JSON));
         assertExpectedMessage(resultActions, message);
     }
@@ -76,7 +76,7 @@ public class MessagingControllerTest {
 
         // when and then
         ResultActions resultActions = mockMvc.perform(
-            get(MESSAGES_PATH + path(message.getId())).contentType(JSON));
+            get(MESSAGES_FULL_PATH + path(message.getId())).contentType(JSON));
         resultActions.andExpect(status().isOk()).andExpect(content().contentType(JSON));
         assertExpectedMessage(resultActions, message);
     }
@@ -88,12 +88,12 @@ public class MessagingControllerTest {
 
         // when and then
         ResultActions resultActions = mockMvc.perform(
-            get(MESSAGES_PATH + path(ANY_VALUE)).contentType(JSON));
+            get(MESSAGES_FULL_PATH + path(ANY_VALUE)).contentType(JSON));
         resultActions.andExpect(status().isNotFound());
     }
 
     @Test
-    public void getSentMessages() throws Exception {
+    public void getMessagesBySenderId() throws Exception {
         // given
         Message message1 = newTestMessageWithId(1);
         Message message2 = newTestMessageWithId(2);
@@ -101,13 +101,13 @@ public class MessagingControllerTest {
 
         // when and then
         ResultActions resultActions = mockMvc.perform(
-            get(MESSAGES_PATH + SENT_PATH + path(ANY_VALUE)).contentType(JSON));
+            get(MESSAGES_FULL_PATH).param(SENDER_ID_VARNAME, ANY_VALUE.toString()).contentType(JSON));
         resultActions.andExpect(status().isOk()).andExpect(content().contentType(JSON));
         assertExpectedMessages(resultActions, message1, message2);
     }
 
     @Test
-    public void getReceivedMessages() throws Exception {
+    public void getMessagesByReceiverId() throws Exception {
         // given
         Message message1 = newTestMessageWithId(1);
         Message message2 = newTestMessageWithId(2);
@@ -115,7 +115,21 @@ public class MessagingControllerTest {
 
         // when and then
         ResultActions resultActions = mockMvc.perform(
-            get(MESSAGES_PATH + RECEIVED_PATH + path(ANY_VALUE)).contentType(JSON));
+            get(MESSAGES_FULL_PATH).param(RECEIVER_ID_VARNAME, ANY_VALUE.toString()).contentType(JSON));
+        resultActions.andExpect(status().isOk()).andExpect(content().contentType(JSON));
+        assertExpectedMessages(resultActions, message1, message2);
+    }
+
+    @Test
+    public void getAllMessages() throws Exception {
+        // given
+        Message message1 = newTestMessageWithId(1);
+        Message message2 = newTestMessageWithId(2);
+        when(messageService.getReceivedMessagesOfUser(anyInt())).thenReturn(list(message1, message2));
+
+        // when and then
+        ResultActions resultActions = mockMvc.perform(
+            get(MESSAGES_FULL_PATH).param(RECEIVER_ID_VARNAME, ANY_VALUE.toString()).contentType(JSON));
         resultActions.andExpect(status().isOk()).andExpect(content().contentType(JSON));
         assertExpectedMessages(resultActions, message1, message2);
     }
@@ -127,13 +141,13 @@ public class MessagingControllerTest {
     private static void assertExpectedMessages(ResultActions resultActions, Message... expectedMessages) throws Exception {
         int arrayLength = expectedMessages.length;
         for (int i = 0; i < arrayLength; i++) {
-            Message expectedMessage = expectedMessages[i];
-            resultActions.andExpect(jsonPath(formExpression("id", i, arrayLength)).value(expectedMessage.getId()))
-                .andExpect(jsonPath(formExpression("senderId", i, arrayLength)).value(expectedMessage.getSenderId()))
-                .andExpect(jsonPath(formExpression("receiverId", i, arrayLength)).value(expectedMessage.getReceiverId()))
-                .andExpect(jsonPath(formExpression("subject", i, arrayLength)).value(expectedMessage.getSubject()))
-                .andExpect(jsonPath(formExpression("body", i, arrayLength)).value(expectedMessage.getBody()))
-                .andExpect(jsonPath(formExpression("sentDate", i, arrayLength)).value(format(expectedMessage.getSentDate())));
+            Message expected = expectedMessages[i];
+            resultActions.andExpect(jsonPath(formExpression("id", i, arrayLength)).value(expected.getId()))
+                .andExpect(jsonPath(formExpression("senderId", i, arrayLength)).value(expected.getSenderId()))
+                .andExpect(jsonPath(formExpression("receiverId", i, arrayLength)).value(expected.getReceiverId()))
+                .andExpect(jsonPath(formExpression("subject", i, arrayLength)).value(expected.getSubject()))
+                .andExpect(jsonPath(formExpression("body", i, arrayLength)).value(expected.getBody()))
+                .andExpect(jsonPath(formExpression("sentDate", i, arrayLength)).value(format(expected.getSentDate())));
         }
     }
 

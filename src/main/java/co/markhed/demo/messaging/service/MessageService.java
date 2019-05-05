@@ -15,4 +15,6 @@ public interface MessageService {
 
     List<Message> getReceivedMessagesOfUser(int userId);
 
+    List<Message> getAllMessages();
+
 }

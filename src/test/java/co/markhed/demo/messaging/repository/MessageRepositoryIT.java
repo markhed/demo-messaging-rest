@@ -1,23 +1,26 @@
 package co.markhed.demo.messaging.repository;
 
+import co.markhed.demo.messaging.ApplicationTestConfig;
 import co.markhed.demo.messaging.model.Message;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import static co.markhed.demo.messaging.util.TestMessageUtil.newTestMessageWithNoId;
+import java.util.Optional;
 import static co.markhed.demo.messaging.util.TestMessageUtil.asTestReceiverId;
 import static co.markhed.demo.messaging.util.TestMessageUtil.asTestSenderId;
+import static co.markhed.demo.messaging.util.TestMessageUtil.newTestMessageWithNoId;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -26,6 +29,7 @@ import static org.junit.Assert.assertThat;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
+@ContextConfiguration(classes = ApplicationTestConfig.class)
 @ActiveProfiles("jpa, hsqldb")
 public class MessageRepositoryIT {
 
@@ -66,7 +70,7 @@ public class MessageRepositoryIT {
         assertThat(message.getBody(), is(expectedBody));
     }
 
-    @Test(expected = EmptyResultDataAccessException.class)
+    @Test
     @Transactional
     public void delete() throws Exception {
         // given
@@ -77,7 +81,8 @@ public class MessageRepositoryIT {
         messageRepository.delete(message);
 
         // then exception
-        messageRepository.findById(messageId);
+        Optional<Message> deletedMessage = messageRepository.findById(messageId);
+        assertFalse(deletedMessage.isPresent());
     }
 
     @Test
@@ -89,14 +94,14 @@ public class MessageRepositoryIT {
         Message expected3 = saveMessage(3);
 
         // when
-        Message actual1 = messageRepository.findById(expected1.getId());
-        Message actual2 = messageRepository.findById(expected2.getId());
-        Message actual3 = messageRepository.findById(expected3.getId());
+        Optional<Message> actual1 = messageRepository.findById(expected1.getId());
+        Optional<Message> actual2 = messageRepository.findById(expected2.getId());
+        Optional<Message> actual3 = messageRepository.findById(expected3.getId());
 
         // then
-        assertThat(actual1, is(expected1));
-        assertThat(actual2, is(expected2));
-        assertThat(actual3, is(expected3));
+        assertThat(actual1.get(), is(expected1));
+        assertThat(actual2.get(), is(expected2));
+        assertThat(actual3.get(), is(expected3));
     }
 
     @Test
@@ -147,7 +152,7 @@ public class MessageRepositoryIT {
         expected.add(saveMessage(3));
 
         // when
-        List<Message> actual = messageRepository.findAll();
+        Iterable<Message> actual = messageRepository.findAll();
 
         // then
         assertThat(actual, containsInAnyOrder(expected.toArray()));

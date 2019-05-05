@@ -10,6 +10,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.List;
 import java.util.Optional;
+import static java.util.Optional.of;
 import static org.assertj.core.util.Lists.newArrayList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
@@ -51,7 +52,7 @@ public class MessageServiceImplTest {
         int messageId = 1;
         Message message = mock(Message.class);
         when(message.getId()).thenReturn(messageId);
-        when(messageRepository.findById(messageId)).thenReturn(message);
+        when(messageRepository.findById(messageId)).thenReturn(of(message));
 
         // when
         Optional<Message> actualMessage = messageService.readMessage(messageId);
@@ -83,6 +84,19 @@ public class MessageServiceImplTest {
 
         // when
         List<Message> actualMessages = messageService.getReceivedMessagesOfUser(userId);
+
+        // then
+        assertThat(actualMessages, containsInAnyOrder(messages.toArray()));
+    }
+
+    @Test
+    public void getAllMessages() throws Exception {
+        // given
+        List<Message> messages = newArrayList(new Message(), new Message(), new Message());
+        when(messageRepository.findAll()).thenReturn(messages);
+
+        // when
+        List<Message> actualMessages = messageService.getAllMessages();
 
         // then
         assertThat(actualMessages, containsInAnyOrder(messages.toArray()));
