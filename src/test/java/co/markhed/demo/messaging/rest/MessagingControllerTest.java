@@ -15,9 +15,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import static co.markhed.demo.messaging.rest.util.Constants.ApiPaths.MESSAGES_FULL_PATH;
+import static co.markhed.demo.messaging.rest.util.Constants.ApiPaths.RECEIVER_SUBPATH;
+import static co.markhed.demo.messaging.rest.util.Constants.ApiPaths.SENDER_SUBPATH;
 import static co.markhed.demo.messaging.rest.util.Constants.JSON;
-import static co.markhed.demo.messaging.rest.util.Constants.VariablePaths.RECEIVER_ID_VARNAME;
-import static co.markhed.demo.messaging.rest.util.Constants.VariablePaths.SENDER_ID_VARNAME;
 import static co.markhed.demo.messaging.util.GeneralUtil.format;
 import static co.markhed.demo.messaging.util.GeneralUtil.path;
 import static co.markhed.demo.messaging.util.TestMessageUtil.ANY_VALUE;
@@ -101,7 +101,7 @@ public class MessagingControllerTest {
 
         // when and then
         ResultActions resultActions = mockMvc.perform(
-            get(MESSAGES_FULL_PATH).param(SENDER_ID_VARNAME, ANY_VALUE.toString()).contentType(JSON));
+            get(MESSAGES_FULL_PATH + SENDER_SUBPATH + path(ANY_VALUE)).contentType(JSON));
         resultActions.andExpect(status().isOk()).andExpect(content().contentType(JSON));
         assertExpectedMessages(resultActions, message1, message2);
     }
@@ -115,7 +115,7 @@ public class MessagingControllerTest {
 
         // when and then
         ResultActions resultActions = mockMvc.perform(
-            get(MESSAGES_FULL_PATH).param(RECEIVER_ID_VARNAME, ANY_VALUE.toString()).contentType(JSON));
+            get(MESSAGES_FULL_PATH + RECEIVER_SUBPATH + path(ANY_VALUE)).contentType(JSON));
         resultActions.andExpect(status().isOk()).andExpect(content().contentType(JSON));
         assertExpectedMessages(resultActions, message1, message2);
     }
@@ -125,11 +125,10 @@ public class MessagingControllerTest {
         // given
         Message message1 = newTestMessageWithId(1);
         Message message2 = newTestMessageWithId(2);
-        when(messageService.getReceivedMessagesOfUser(anyInt())).thenReturn(list(message1, message2));
+        when(messageService.getAllMessages()).thenReturn(list(message1, message2));
 
         // when and then
-        ResultActions resultActions = mockMvc.perform(
-            get(MESSAGES_FULL_PATH).param(RECEIVER_ID_VARNAME, ANY_VALUE.toString()).contentType(JSON));
+        ResultActions resultActions = mockMvc.perform(get(MESSAGES_FULL_PATH).contentType(JSON));
         resultActions.andExpect(status().isOk()).andExpect(content().contentType(JSON));
         assertExpectedMessages(resultActions, message1, message2);
     }

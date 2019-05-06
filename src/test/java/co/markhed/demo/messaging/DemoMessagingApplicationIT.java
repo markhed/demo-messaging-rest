@@ -14,18 +14,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
 import static co.markhed.demo.messaging.rest.util.Constants.ApiPaths.MESSAGES_FULL_PATH;
-import static co.markhed.demo.messaging.rest.util.Constants.VariablePaths.RECEIVER_ID_VARNAME;
-import static co.markhed.demo.messaging.rest.util.Constants.VariablePaths.SENDER_ID_VARNAME;
+import static co.markhed.demo.messaging.rest.util.Constants.ApiPaths.RECEIVER_SUBPATH;
+import static co.markhed.demo.messaging.rest.util.Constants.ApiPaths.SENDER_SUBPATH;
 import static co.markhed.demo.messaging.util.GeneralUtil.path;
 import static co.markhed.demo.messaging.util.TestMessageUtil.ANY_VALUE;
 import static co.markhed.demo.messaging.util.TestMessageUtil.newTestMessageRequest;
-import static java.lang.String.valueOf;
-import static java.util.Collections.EMPTY_MAP;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
@@ -158,7 +155,7 @@ public class DemoMessagingApplicationIT {
 
         // when
         ResponseEntity<List<Message>> response = restTemplate.exchange(
-            get(messageUrlWithParam(SENDER_ID_VARNAME, valueOf(senderId))).accept(APPLICATION_JSON).build(),
+            get(messageUrl(SENDER_SUBPATH + path(senderId))).accept(APPLICATION_JSON).build(),
             new ParameterizedTypeReference<List<Message>>() {});
 
         // then
@@ -186,7 +183,7 @@ public class DemoMessagingApplicationIT {
 
         // when
         ResponseEntity<List<Message>> response = restTemplate.exchange(
-            get(messageUrlWithParam(RECEIVER_ID_VARNAME, valueOf(receiverId))).accept(APPLICATION_JSON).build(),
+            get(messageUrl(RECEIVER_SUBPATH + path(receiverId))).accept(APPLICATION_JSON).build(),
             new ParameterizedTypeReference<List<Message>>() {});
 
         // then
@@ -219,16 +216,6 @@ public class DemoMessagingApplicationIT {
 
         List<Message> responseBody = response.getBody();
         assertThat(responseBody, hasItems(expected1, expected2, expected3));
-    }
-
-    private URI messageUrlWithParam(String... paramKeysAndValues) {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(messageUrl());
-
-        for (int i = 0; i < paramKeysAndValues.length; i += 2) {
-            builder.queryParam(paramKeysAndValues[i], paramKeysAndValues[i + 1]);
-        }
-
-        return builder.build(EMPTY_MAP);
     }
 
     private URI messageUrl() {
