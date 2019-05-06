@@ -1,6 +1,8 @@
 package co.markhed.demo.messaging.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,22 +14,29 @@ import static co.markhed.demo.messaging.util.GeneralUtil.TIME_ZONE;
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static javax.persistence.TemporalType.TIMESTAMP;
 
+
+@ApiModel(description = "Details about a created message")
 @Entity
 @Table(name = "messages")
 public class Message extends BaseEntity {
 
+    @ApiModelProperty(notes = "The ID of the sender")
     @Column(name = "senderId", nullable = false)
     private Integer senderId;
 
+    @ApiModelProperty(notes = "The ID of the receiver")
     @Column(name = "receiverId", nullable = false)
     private Integer receiverId;
 
+    @ApiModelProperty(notes = "The subject of the message")
     @Column(name = "subject", nullable = false)
     private String subject;
 
+    @ApiModelProperty(notes = "The body of the message")
     @Column(name = "body", nullable = false)
     private String body;
 
+    @ApiModelProperty(notes = "The date and time the message is posted")
     @Column(name = "sentDate", nullable = false)
     @Temporal(TIMESTAMP)
     @JsonFormat(shape = STRING, pattern = DATE_PATTERN, timezone = TIME_ZONE)

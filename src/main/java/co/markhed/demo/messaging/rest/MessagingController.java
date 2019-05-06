@@ -3,6 +3,10 @@ package co.markhed.demo.messaging.rest;
 import co.markhed.demo.messaging.model.Message;
 import co.markhed.demo.messaging.rest.request.MessageRequest;
 import co.markhed.demo.messaging.service.MessageService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +38,7 @@ import static co.markhed.demo.messaging.rest.util.ResponseUtil.createdResponse;
 import static co.markhed.demo.messaging.rest.util.ResponseUtil.notFoundResponse;
 import static co.markhed.demo.messaging.rest.util.ResponseUtil.okResponse;
 
+@Api
 @RestController
 @RequestMapping(path = MESSAGES_FULL_PATH, produces = JSON)
 public class MessagingController {
@@ -41,6 +46,10 @@ public class MessagingController {
     @Autowired
     private MessageService messageService;
 
+    @ApiOperation(value = "Create a message", response = Message.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 201, message = "Successfully created message"),
+        @ApiResponse(code = 400, message = "Message is not created because request is not correct or has missing values")})
     @PostMapping
     public ResponseEntity<Message> postMessage(@RequestBody @Valid MessageRequest messageRequest,
             BindingResult bindingResult, UriComponentsBuilder uriBuilder) {
@@ -58,24 +67,34 @@ public class MessagingController {
         return createdResponse(message, headers);
     }
 
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Successfully retrieved message"),
+        @ApiResponse(code = 404, message = "Message requested does not exist")})
+    @ApiOperation(value = "Get a message", response = Message.class)
     @GetMapping(path = MESSAGE_ID_VARPATH)
     public ResponseEntity<Message> getMessage(@PathVariable(MESSAGE_ID_VARNAME) int messageId) {
         Optional<Message> message = messageService.readMessage(messageId);
         return message.isPresent() ? okResponse(message.get()) : notFoundResponse();
     }
 
+    @ApiOperation(value = "Get all messages", response = Message.class, responseContainer="List")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully retrieved messages")})
     @GetMapping
     public ResponseEntity<List<Message>> getAllMessages() {
         List<Message> messages = messageService.getAllMessages();
         return okResponse(messages);
     }
 
+    @ApiOperation(value = "Get all messages by sender", response = Message.class, responseContainer="List")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully retrieved messages")})
     @GetMapping(path = SENDER_SUBPATH + SENDER_ID_VARPATH)
     public ResponseEntity<List<Message>> getMessagesBySenderId(@PathVariable(SENDER_ID_VARNAME) int userId) {
         List<Message> messages = messageService.getSentMessagesOfUser(userId);
         return okResponse(messages);
     }
 
+    @ApiOperation(value = "Get all messages by receiver", response = Message.class, responseContainer="List")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully retrieved messages")})
     @GetMapping(path = RECEIVER_SUBPATH + RECEIVER_ID_VARPATH)
     public ResponseEntity<List<Message>> getMessagesByReceiverId(@PathVariable(RECEIVER_ID_VARNAME) int userId) {
         List<Message> messages = messageService.getReceivedMessagesOfUser(userId);
